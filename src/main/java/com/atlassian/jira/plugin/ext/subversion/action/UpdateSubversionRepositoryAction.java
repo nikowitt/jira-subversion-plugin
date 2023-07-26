@@ -2,82 +2,87 @@ package com.atlassian.jira.plugin.ext.subversion.action;
 
 import com.atlassian.jira.plugin.ext.subversion.MultipleSubversionRepositoryManager;
 import com.atlassian.jira.plugin.ext.subversion.SubversionManager;
-
+import com.atlassian.jira.security.request.RequestMethod;
+import com.atlassian.jira.security.request.SupportedMethods;
 
 public class UpdateSubversionRepositoryAction extends AddSubversionRepositoryAction {
-    private long repoId = -1;
+	private long repoId = -1;
 
-    public UpdateSubversionRepositoryAction(MultipleSubversionRepositoryManager multipleRepoManager) {
-        super(multipleRepoManager);
-    }
+	public UpdateSubversionRepositoryAction(MultipleSubversionRepositoryManager multipleRepoManager) {
+		super(multipleRepoManager);
+	}
 
-    public String doDefault() {
-        if (ERROR.equals(super.doDefault()))
-            return ERROR;
+	@Override
+	@SupportedMethods(RequestMethod.GET)
+	public String doDefault() {
+		if (ERROR.equals(super.doDefault())) {
+			return ERROR;
+		}
 
-        if (!hasPermissions()) {
-            return PERMISSION_VIOLATION_RESULT;
-        }
+		if (!hasPermissions()) {
+			return PERMISSION_VIOLATION_RESULT;
+		}
 
+		if (repoId == -1) {
+			addErrorMessage(getText("subversion.repository.id.missing"));
+			return ERROR;
+		}
 
-        if (repoId == -1) {
-            addErrorMessage(getText("subversion.repository.id.missing"));
-            return ERROR;
-        }
+		// Retrieve the cvs repository
+		SubversionManager repository = getMultipleRepoManager().getRepository(repoId);
+		if (repository == null) {
+			addErrorMessage(getText("subversion.repository.does.not.exist", Long.toString(repoId)));
+			return ERROR;
+		}
 
-        // Retrieve the cvs repository
-        final SubversionManager repository = getMultipleRepoManager().getRepository(repoId);
-        if (repository == null) {
-            addErrorMessage(getText("subversion.repository.does.not.exist", Long.toString(repoId)));
-            return ERROR;
-        }
+		setDisplayName(repository.getDisplayName());
+		setRoot(repository.getRoot());
+		if (repository.getViewLinkFormat() != null) {
+			setWebLinkType(repository.getViewLinkFormat().getType());
+			setChangesetFormat(repository.getViewLinkFormat().getChangesetFormat());
+			setViewFormat(repository.getViewLinkFormat().getViewFormat());
+			setFileAddedFormat(repository.getViewLinkFormat().getFileAddedFormat());
+			setFileDeletedFormat(repository.getViewLinkFormat().getFileDeletedFormat());
+			setFileModifiedFormat(repository.getViewLinkFormat().getFileModifiedFormat());
+			setFileReplacedFormat(repository.getViewLinkFormat().getFileReplacedFormat());
+		}
+		setUsername(repository.getUsername());
+		setPassword(repository.getPassword());
+		setPrivateKeyFile(repository.getPrivateKeyFile());
+		setRevisionCacheSize(new Integer(repository.getRevisioningCacheSize()));
+		setRevisionIndexing(true);
 
-        this.setDisplayName(repository.getDisplayName());
-        this.setRoot(repository.getRoot());
-        if (repository.getViewLinkFormat() != null) {
-            this.setWebLinkType(repository.getViewLinkFormat().getType());
-            this.setChangesetFormat(repository.getViewLinkFormat().getChangesetFormat());
-            this.setViewFormat(repository.getViewLinkFormat().getViewFormat());
-            this.setFileAddedFormat(repository.getViewLinkFormat().getFileAddedFormat());
-            this.setFileDeletedFormat(repository.getViewLinkFormat().getFileDeletedFormat());
-            this.setFileModifiedFormat(repository.getViewLinkFormat().getFileModifiedFormat());
-            this.setFileReplacedFormat(repository.getViewLinkFormat().getFileReplacedFormat());
-        }
-        this.setUsername(repository.getUsername());
-        this.setPassword(repository.getPassword());
-        this.setPrivateKeyFile(repository.getPrivateKeyFile());
-        this.setRevisionCacheSize(new Integer(repository.getRevisioningCacheSize()));
-        this.setRevisionIndexing(true);
+		return INPUT;
+	}
 
-        return INPUT;
-    }
+	@Override
+	@SupportedMethods({ RequestMethod.GET, RequestMethod.POST })
+	public String doExecute() {
+		if (!hasPermissions()) {
+			addErrorMessage(getText("subversion.admin.privilege.required"));
+			return ERROR;
+		}
 
-    public String doExecute() {
-        if (!hasPermissions()) {
-            addErrorMessage(getText("subversion.admin.privilege.required"));
-            return ERROR;
-        }
+		if (repoId == -1) {
+			return getRedirect("ViewSubversionRepositories.jspa");
+		}
 
-        if (repoId == -1) {
-            return getRedirect("ViewSubversionRepositories.jspa");
-        }
+		SubversionManager subversionManager = getMultipleRepoManager().updateRepository(repoId, this);
+		if (!subversionManager.isActive()) {
+			repoId = subversionManager.getId();
+			addErrorMessage(subversionManager.getInactiveMessage());
+			addErrorMessage(getText("admin.errors.occured.when.updating"));
+			return ERROR;
+		}
+		return getRedirect("ViewSubversionRepositories.jspa");
+	}
 
-        SubversionManager subversionManager = getMultipleRepoManager().updateRepository(repoId, this);
-        if (!subversionManager.isActive()) {
-            repoId = subversionManager.getId();
-            addErrorMessage(subversionManager.getInactiveMessage());
-            addErrorMessage(getText("admin.errors.occured.when.updating"));
-            return ERROR;
-        }
-        return getRedirect("ViewSubversionRepositories.jspa");
-    }
+	public long getRepoId() {
+		return repoId;
+	}
 
-    public long getRepoId() {
-        return repoId;
-    }
-
-    public void setRepoId(long repoId) {
-        this.repoId = repoId;
-    }
+	public void setRepoId(long repoId) {
+		this.repoId = repoId;
+	}
 
 }

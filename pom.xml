@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <repositories>
+        <repository>
+            <id>my-repo1</id>
+            <name>Atlassian Maven</name>
+            <url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+        </repository>
+
+    </repositories>
     <parent>
         <groupId>com.atlassian.pom</groupId>
         <artifactId>public-pom</artifactId>
-        <version>3.0.91</version>
+        <version>6.2.2</version>
     </parent>
 
     <groupId>com.atlassian.jira.plugin.ext.subversion</groupId>
     <artifactId>atlassian-jira-subversion-plugin</artifactId>
     <!-- Use branch 1.x_nonclustered to support JIRA 6.2 or earlier -->
-    <version>3.0.2-jira8</version>
+    <version>3.0.3.1-jira9</version>
     <name>JIRA Subversion plugin</name>
     <packaging>atlassian-plugin</packaging>
     <description>A plugin to integrate JIRA with Subversion.</description>
@@ -28,7 +37,7 @@
         <connection>scm:git:git@bitbucket.org:atlassian/jira-subversion-plugin.git</connection>
         <developerConnection>scm:git:git@bitbucket.org:atlassian/jira-subversion-plugin.git</developerConnection>
         <url>https://bitbucket.org/atlassian/jira-subversion-plugin</url>
-      <tag>HEAD</tag>
+        <tag>HEAD</tag>
     </scm>
     <distributionManagement>
         <repository>
@@ -96,7 +105,16 @@
                 <artifactId>jira-maven-plugin</artifactId>
                 <version>${amps.version}</version>
                 <extensions>true</extensions>
+
                 <configuration>
+                    <repositories>
+                        <repository>
+                            <id>my-repo1</id>
+                            <name>Atlassian Maven</name>
+                            <url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+                        </repository>
+
+                    </repositories>
                     <applications>
                         <application>
                             <applicationKey>jira-software</applicationKey>
@@ -311,6 +329,30 @@
             <artifactId>guava</artifactId>
             <version>11.0.2-atlassian-01</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>jmock</groupId>
+            <artifactId>jmock</artifactId>
+            <version>1.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.25.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <properties>

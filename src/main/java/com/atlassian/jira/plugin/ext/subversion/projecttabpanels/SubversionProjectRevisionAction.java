@@ -1,13 +1,16 @@
 package com.atlassian.jira.plugin.ext.subversion.projecttabpanels;
 
-import com.atlassian.jira.plugin.ext.subversion.MultipleSubversionRepositoryManager;
-import com.atlassian.jira.plugin.ext.subversion.issuetabpanels.changes.SubversionRevisionAction;
-import com.atlassian.jira.plugin.projectpanel.ProjectTabPanelModuleDescriptor;
-import com.atlassian.jira.web.action.JiraWebActionSupport;
+import java.util.Map;
+
 import org.ofbiz.core.util.UtilMisc;
 import org.tmatesoft.svn.core.SVNLogEntry;
 
-import java.util.Map;
+import com.atlassian.jira.plugin.ext.subversion.MultipleSubversionRepositoryManager;
+import com.atlassian.jira.plugin.ext.subversion.issuetabpanels.changes.SubversionRevisionAction;
+import com.atlassian.jira.plugin.projectpanel.ProjectTabPanelModuleDescriptor;
+import com.atlassian.jira.security.request.RequestMethod;
+import com.atlassian.jira.security.request.SupportedMethods;
+import com.atlassian.jira.web.action.JiraWebActionSupport;
 
 /**
  * One item in the 'Subversion Commits' project tab.
@@ -15,18 +18,19 @@ import java.util.Map;
  * This class extends {@link SubversionRevisionAction} (basically, there is no issue to group by here,
  * and we need to use a ProjectTabPanelModuleDescriptor in stead of an IssueTabPanelModuleDescriptor)
  */
+@SupportedMethods({ RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT })
 public class SubversionProjectRevisionAction extends SubversionRevisionAction {
-    protected final ProjectTabPanelModuleDescriptor projectDescriptor;
+	protected final ProjectTabPanelModuleDescriptor projectDescriptor;
 
-    public SubversionProjectRevisionAction(SVNLogEntry logEntry,
-                                           MultipleSubversionRepositoryManager multipleSubversionRepositoryManager,
-                                           ProjectTabPanelModuleDescriptor descriptor, long repoId) {
-        super(logEntry, multipleSubversionRepositoryManager, null, repoId);
-        this.projectDescriptor = descriptor;
-    }
+	public SubversionProjectRevisionAction(SVNLogEntry logEntry,
+			MultipleSubversionRepositoryManager multipleSubversionRepositoryManager,
+			ProjectTabPanelModuleDescriptor descriptor, long repoId) {
+		super(logEntry, multipleSubversionRepositoryManager, null, repoId);
+		projectDescriptor = descriptor;
+	}
 
-    public String getHtml(JiraWebActionSupport webAction) {
-        Map params = UtilMisc.toMap("webAction", webAction, "action", this);
-        return descriptor.getHtml("view", params);
-    }
+	public String getHtml(JiraWebActionSupport webAction) {
+		Map params = UtilMisc.toMap("webAction", webAction, "action", this);
+		return descriptor.getHtml("view", params);
+	}
 }
